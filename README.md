@@ -17,13 +17,11 @@ Le dépôt est disponible à l'adresse `https://github.com/dzvellox/prl-vast-min
 ### 3. Commande à copier dans le terminal Vast.ai
 
 ```bash
-git clone https://github.com/VOTRE_USER/prl-vast-miner.git && \
+git clone https://github.com/dzvellox/prl-vast-miner.git && \
 cd prl-vast-miner && \
 chmod +x *.sh scripts/*.sh && \
 ./run.sh
 ```
-
-Remplace seulement `VOTRE_USER` par ton nom d'utilisateur GitHub.
 
 Ensuite le script :
 
@@ -37,7 +35,7 @@ Ensuite le script :
 8. applique le profil RTX 5090 si les conditions le permettent ;
 9. lance le mineur choisi et le redémarre automatiquement s'il plante.
 
-Sur une instance existante, mets le dépôt à jour puis relance `./run.sh` : l'installateur compare la version locale avec `scripts/miner-version.env` et remplace BzMiner si nécessaire. Un binaire personnalisé fourni par `MINER_BIN` n'est pas remplacé.
+Sur une instance existante, mets le dépôt à jour puis relance `./run.sh` : SRBMiner est testé si le profil RTX 5090 est éligible ; BzMiner reste disponible en repli. Les installateurs vérifient la version et l'archive de chaque mineur. Un binaire personnalisé fourni par `MINER_BIN` n'est pas remplacé.
 
 ```bash
 cd /root/prl-vast-miner && git pull --ff-only && ./stop.sh && ./run.sh
@@ -48,7 +46,7 @@ cd /root/prl-vast-miner && git pull --ff-only && ./stop.sh && ./run.sh
 Pour démarrer automatiquement au boot de l'instance :
 
 ```bash
-bash -lc 'DIR=/root/prl-vast-miner; REPO=https://github.com/VOTRE_USER/prl-vast-miner.git; if [ -d "$DIR/.git" ]; then git -C "$DIR" pull --ff-only; else git clone "$REPO" "$DIR"; fi; chmod +x "$DIR"/*.sh "$DIR"/scripts/*.sh; exec "$DIR/run.sh"'
+bash -lc 'DIR=/root/prl-vast-miner; REPO=https://github.com/dzvellox/prl-vast-miner.git; if [ -d "$DIR/.git" ]; then git -C "$DIR" pull --ff-only; else git clone "$REPO" "$DIR"; fi; chmod +x "$DIR"/*.sh "$DIR"/scripts/*.sh; exec "$DIR/run.sh"'
 ```
 
 Si ton dépôt est privé, il faudra fournir une méthode d'authentification GitHub. Pour un lancement sans interaction, un dépôt public est plus simple. Le Mining Username Kryptex est un identifiant de minage ; **ne mets jamais de mot de passe, seed phrase, clé privée ou clé API dans le dépôt**.
