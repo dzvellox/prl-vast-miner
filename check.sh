@@ -21,7 +21,7 @@ else
 fi
 
 if [[ "$(id -u)" -eq 0 ]]; then
-  say_ok "exécution root : les réglages OC BzMiner peuvent être tentés"
+  say_ok "exécution root : les réglages OC SRBMiner/BzMiner peuvent être tentés"
 else
   say_warn "pas root : le profil OC sera automatiquement ignoré sous Linux"
 fi
@@ -45,7 +45,13 @@ fi
 if [[ -x "$ROOT_DIR/.local/bin/bzminer" ]]; then
   say_ok "BzMiner installé localement"
 else
-  say_warn "BzMiner pas encore installé (run.sh l'installera)"
+  say_warn "BzMiner pas encore installé (run.sh l'installera en cas de repli)"
+fi
+
+if [[ -f "$ROOT_DIR/.local/bin/.srbminer-path" ]] && [[ -x "$(<"$ROOT_DIR/.local/bin/.srbminer-path")" ]]; then
+  say_ok "SRBMiner installé localement"
+else
+  say_warn "SRBMiner pas encore installé (run.sh le testera si le profil OC est éligible)"
 fi
 
 exit $(( ok ? 0 : 1 ))
