@@ -34,7 +34,9 @@ cleanup() {
   fi
   wait "$child" 2>/dev/null || true
 }
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 oc_observed() {
   local telemetry
