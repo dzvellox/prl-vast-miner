@@ -7,8 +7,9 @@ CACHE_DIR="$ROOT_DIR/.cache"
 BIN_DIR="$ROOT_DIR/.local/bin"
 ARCHIVE_PATH="$CACHE_DIR/$WILDRIG_ARCHIVE"
 VERSION_MARKER="$BIN_DIR/.wildrig-version"
+PATH_MARKER="$BIN_DIR/.wildrig-path"
 mkdir -p "$CACHE_DIR" "$BIN_DIR"
-if [[ -x "$BIN_DIR/wildrig" && -f "$VERSION_MARKER" && "$(<"$VERSION_MARKER")" == "$WILDRIG_VERSION" ]]; then
+if [[ -f "$PATH_MARKER" && -x "$(<"$PATH_MARKER")" && -f "$VERSION_MARKER" && "$(<"$VERSION_MARKER")" == "$WILDRIG_VERSION" ]]; then
   exit 0
 fi
 command -v sha256sum >/dev/null || exit 10
@@ -35,8 +36,7 @@ mkdir -p "$INSTALL_DIR"
 tar -xzf "$ARCHIVE_PATH" -C "$INSTALL_DIR"
 found="$(find "$INSTALL_DIR" -type f \( -name wildrig -o -name wildrig-multi \) -print -quit)"
 [[ -n "$found" ]] || { echo "Binaire WildRig introuvable" >&2; exit 12; }
-cp "$found" "$BIN_DIR/wildrig.new"
-chmod 0755 "$BIN_DIR/wildrig.new"
-mv -f "$BIN_DIR/wildrig.new" "$BIN_DIR/wildrig"
+chmod 0755 "$found"
+printf '%s\n' "$found" > "$PATH_MARKER"
 printf '%s\n' "$WILDRIG_VERSION" > "$VERSION_MARKER"
 echo "WildRig Multi $WILDRIG_VERSION installé."
