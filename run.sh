@@ -88,7 +88,7 @@ if [[ "$OC_ENABLE" == "1" ]]; then
     echo "[OC] Profil non appliqué : BzMiner doit être lancé en root sous Linux pour modifier les clocks/power limit."
   else
     OC_APPLY=1
-    echo "[OC] Profil RTX 5090 activé : core +${OC_CORE_OFFSET}, lock core ${OC_LOCK_CORE} MHz, lock mémoire ${OC_LOCK_MEMORY} MHz, PL ${OC_POWER_LIMIT} W."
+    echo "[OC] Profil RTX 5090 demandé : core +${OC_CORE_OFFSET}, lock core ${OC_LOCK_CORE} MHz, lock mémoire ${OC_LOCK_MEMORY} MHz, PL ${OC_POWER_LIMIT} W."
   fi
 else
   echo "[OC] Désactivé (OC_ENABLE=$OC_ENABLE)."
