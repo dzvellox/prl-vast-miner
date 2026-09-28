@@ -43,14 +43,18 @@ read -r -a EXTRA_ARR <<< "$EXTRA_ARGS"
 # En mode compte Kryptex, le "wallet" est le Mining Username (krx...).
 KRYPTEX_LOGIN="${KRYPTEX_MINING_USERNAME}/${WORKER_NAME}"
 
-if [[ "$MINER_KIND" == "wildrig" ]]; then
+if [[ "$MINER_KIND" == "srbminer" ]]; then
+  TLS_ARGS=()
+  if [[ "$POOL_URL" == stratum+ssl://* ]]; then TLS_ARGS=(--tls true); fi
   CMD=(
-    "$MINER_BIN" -a pearlhash -o "${POOL_URL#*://}"
-    -u "$KRYPTEX_LOGIN" -p x --opencl-platforms nvidia
-    --gpu-core-offset "$OC_CORE_OFFSET"
-    --gpu-core-clock "$OC_LOCK_CORE"
-    --gpu-memory-clock "$OC_LOCK_MEMORY"
-    --gpu-powerlimit "$OC_POWER_LIMIT"
+    "$MINER_BIN" --disable-cpu --disable-gpu-amd --disable-gpu-intel
+    --algorithm pearlhash --pool "${POOL_URL#*://}"
+    --wallet "${KRYPTEX_MINING_USERNAME}.${WORKER_NAME}" --password x
+    "${TLS_ARGS[@]}"
+    --gpu-coffset0 "$OC_CORE_OFFSET"
+    --gpu-cclock0 "$OC_LOCK_CORE"
+    --gpu-mclock0 "$OC_LOCK_MEMORY"
+    --gpu-plimit0 "$OC_POWER_LIMIT"
   )
 else
   CMD=(
