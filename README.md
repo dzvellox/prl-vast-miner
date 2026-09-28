@@ -6,31 +6,13 @@ Projet Linux/Vast.ai prêt à lancer pour miner **Pearl (PRL)** avec **BzMiner**
 
 ## 🚀 Lancement rapide sur Vast.ai
 
-### 1. Une seule chose à configurer avant GitHub
+### 1. Vérifier le compte Kryptex
 
-Crée/ouvre ton compte sur Kryptex, vérifie ton email, puis va dans ton profil et copie ton **Mining Username**, qui ressemble à :
-
-```text
-krxYD3M464
-```
-
-Dans `run.sh`, remplace :
-
-```bash
-KRYPTEX_MINING_USERNAME="krxYD3M464"
-```
-
-par ton vrai identifiant :
-
-```bash
-KRYPTEX_MINING_USERNAME="krxYD3M464"
-```
-
-Tu n'auras plus rien à saisir sur les machines Vast.ai.
+Avant de démarrer, vérifie l'identifiant de minage configuré dans `run.sh`. Le dépôt est public : tout identifiant inscrit dans les fichiers publiés est visible par tous. N'y ajoute jamais de mot de passe, de clé API, de seed phrase ou de clé privée.
 
 ### 2. Mettre le projet sur GitHub
 
-Une fois ton `Mining Username` inscrit dans `run.sh`, pousse ce dossier dans ton dépôt GitHub.
+Le dépôt est disponible à l'adresse `https://github.com/dzvellox/prl-vast-miner`.
 
 ### 3. Commande à copier dans le terminal Vast.ai
 
@@ -46,14 +28,20 @@ Remplace seulement `VOTRE_USER` par ton nom d'utilisateur GitHub.
 Ensuite le script :
 
 1. détecte tous les GPU NVIDIA visibles ;
-2. télécharge BzMiner v100.36 depuis sa release officielle ;
-3. vérifie le SHA-256 du binaire ;
+2. télécharge BzMiner v100.40 depuis sa release officielle ;
+3. vérifie le SHA-256 de l'archive officielle ;
 4. configure Pearl ;
 5. se connecte au pool PRL Kryptex ;
 6. utilise ton Mining Username Kryptex ;
 7. crée automatiquement un nom de worker compatible Kryptex ;
 8. applique le profil RTX 5090 si les conditions le permettent ;
 9. lance le minage et redémarre BzMiner automatiquement s'il plante.
+
+Sur une instance existante, mets le dépôt à jour puis relance `./run.sh` : l'installateur compare la version locale avec `scripts/miner-version.env` et remplace BzMiner si nécessaire. Un binaire personnalisé fourni par `MINER_BIN` n'est pas remplacé.
+
+```bash
+cd /root/prl-vast-miner && git pull --ff-only && ./stop.sh && ./run.sh
+```
 
 ### 4. Commande Vast.ai On-start
 
