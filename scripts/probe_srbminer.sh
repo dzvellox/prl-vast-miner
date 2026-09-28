@@ -29,7 +29,7 @@ CMD=(
   --gpu-plimit0 "$OC_POWER_LIMIT"
 )
 echo "[SRBMiner] Essai de ${TRIAL_SECONDS}s ; vérification des fréquences et d'une share Kryptex..."
-"${CMD[@]}" > "$LOG_FILE" 2>&1 &
+(cd "$(dirname "$SRBMINER_BIN")" && exec "${CMD[@]}") > "$LOG_FILE" 2>&1 &
 child=$!
 cleanup() {
   if kill -0 "$child" 2>/dev/null; then
