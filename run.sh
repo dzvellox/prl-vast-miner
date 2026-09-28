@@ -100,25 +100,37 @@ export MAX_RESTARTS="${MAX_RESTARTS:-0}"
 export EXTRA_ARGS="${EXTRA_ARGS:-}"
 export OC_APPLY OC_CORE_OFFSET OC_LOCK_CORE OC_LOCK_MEMORY OC_POWER_LIMIT
 
+MINER_KIND=bzminer
 if [[ -n "${MINER_BIN:-}" ]]; then
-  export MINER_BIN
+  echo "[Mineur] Binaire personnalisé : $MINER_BIN"
 else
-  export MINER_BIN="$ROOT_DIR/.local/bin/bzminer"
+  MINER_BIN="$ROOT_DIR/.local/bin/bzminer"
+  if [[ "$OC_APPLY" == "1" && "${WILDRIG_AUTO:-1}" == "1" ]]; then
+    export GPU_COUNT
+    if bash "$ROOT_DIR/scripts/install_wildrig.sh" &&
+       bash "$ROOT_DIR/scripts/probe_wildrig.sh"; then
+      MINER_KIND=wildrig
+      MINER_BIN="$ROOT_DIR/.local/bin/wildrig"
+    else
+      echo "[Mineur] Essai WildRig non validé : utilisation de BzMiner."
+    fi
+  fi
+  if [[ "$MINER_KIND" == "bzminer" ]]; then
+    bash "$ROOT_DIR/scripts/install_bzminer.sh"
+  fi
 fi
-
-if [[ "$MINER_BIN" == "$ROOT_DIR/.local/bin/bzminer" ]]; then
-  "$ROOT_DIR/scripts/install_bzminer.sh"
-fi
+export MINER_BIN MINER_KIND
 
 echo
 echo "=== Lancement PRL -> Kryptex ==="
+echo "Mineur         : $MINER_KIND"
 echo "Pool           : $POOL_URL"
 echo "Compte Kryptex : ${KRYPTEX_MINING_USERNAME:0:4}***"
 echo "Worker         : $WORKER_NAME"
 echo "Paiement visé  : BNB Smart Chain depuis le compte Kryptex"
 echo "GPU            : $GPU_COUNT NVIDIA (tous les GPU visibles)"
 if [[ "$OC_APPLY" == "1" ]]; then
-  echo "OC             : +${OC_CORE_OFFSET} core / ${OC_LOCK_CORE} core lock / ${OC_LOCK_MEMORY} mem lock / ${OC_POWER_LIMIT} W"
+  echo "OC demandé     : +${OC_CORE_OFFSET} core / ${OC_LOCK_CORE} core lock / ${OC_LOCK_MEMORY} mem lock / ${OC_POWER_LIMIT} W"
 else
   echo "OC             : non appliqué"
 fi
