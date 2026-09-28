@@ -83,7 +83,11 @@ while (( STOP_REQUESTED == 0 )); do
   echo | tee -a "$LOG_FILE"
 
   set +e
-  "${CMD[@]}" > >(tee -a "$LOG_FILE") 2>&1 &
+  if [[ "$MINER_KIND" == "srbminer" ]]; then
+    (cd "$(dirname "$MINER_BIN")" && exec "${CMD[@]}") > >(tee -a "$LOG_FILE") 2>&1 &
+  else
+    "${CMD[@]}" > >(tee -a "$LOG_FILE") 2>&1 &
+  fi
   CHILD_PID=$!
   echo "$CHILD_PID" > "$PID_FILE"
   wait "$CHILD_PID"
