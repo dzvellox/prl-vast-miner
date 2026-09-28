@@ -105,14 +105,14 @@ if [[ -n "${MINER_BIN:-}" ]]; then
   echo "[Mineur] Binaire personnalisé : $MINER_BIN"
 else
   MINER_BIN="$ROOT_DIR/.local/bin/bzminer"
-  if [[ "$OC_APPLY" == "1" && "${WILDRIG_AUTO:-1}" == "1" ]]; then
+  if [[ "$OC_APPLY" == "1" && "${SRBMINER_AUTO:-1}" == "1" ]]; then
     export GPU_COUNT
-    if bash "$ROOT_DIR/scripts/install_wildrig.sh" &&
-       bash "$ROOT_DIR/scripts/probe_wildrig.sh"; then
-      MINER_KIND=wildrig
-      MINER_BIN="$(<"$ROOT_DIR/.local/bin/.wildrig-path")"
+    if bash "$ROOT_DIR/scripts/install_srbminer.sh" &&
+       bash "$ROOT_DIR/scripts/probe_srbminer.sh"; then
+      MINER_KIND=srbminer
+      MINER_BIN="$(<"$ROOT_DIR/.local/bin/.srbminer-path")"
     else
-      echo "[Mineur] Essai WildRig non validé : utilisation de BzMiner."
+      echo "[Mineur] Essai SRBMiner non validé : utilisation de BzMiner."
     fi
   fi
   if [[ "$MINER_KIND" == "bzminer" ]]; then
