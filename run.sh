@@ -106,7 +106,7 @@ else
   export MINER_BIN="$ROOT_DIR/.local/bin/bzminer"
 fi
 
-if [[ ! -x "$MINER_BIN" ]]; then
+if [[ "$MINER_BIN" == "$ROOT_DIR/.local/bin/bzminer" ]]; then
   "$ROOT_DIR/scripts/install_bzminer.sh"
 fi
 
