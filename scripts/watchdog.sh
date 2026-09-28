@@ -73,7 +73,7 @@ fi
 
 restart_count=0
 while (( STOP_REQUESTED == 0 )); do
-  printf '\n[%s] Démarrage $MINER_KIND sur Kryptex (tentative %d)\n' "$(date -Is)" "$((restart_count + 1))" | tee -a "$LOG_FILE"
+  printf '\n[%s] Démarrage %s sur Kryptex (tentative %d)\n' "$(date -Is)" "$MINER_KIND" "$((restart_count + 1))" | tee -a "$LOG_FILE"
   printf '[%s] Commande: ' "$(date -Is)" | tee -a "$LOG_FILE"
   printf '%q ' "${CMD[@]}" | sed "s#${KRYPTEX_MINING_USERNAME}#<KRYPTEX_USER>#g" | tee -a "$LOG_FILE"
   echo | tee -a "$LOG_FILE"
@@ -93,7 +93,7 @@ while (( STOP_REQUESTED == 0 )); do
   fi
 
   restart_count=$((restart_count + 1))
-  printf '[%s] Mineur $MINER_KIND arrêté (code %d).\n' "$(date -Is)" "$rc" | tee -a "$LOG_FILE"
+  printf '[%s] Mineur %s arrêté (code %d).\n' "$(date -Is)" "$MINER_KIND" "$rc" | tee -a "$LOG_FILE"
 
   if (( MAX_RESTARTS > 0 && restart_count >= MAX_RESTARTS )); then
     echo "Nombre maximal de relances atteint ($MAX_RESTARTS)." | tee -a "$LOG_FILE"
