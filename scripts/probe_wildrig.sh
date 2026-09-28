@@ -6,7 +6,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 : "${WORKER_NAME:?}"
 : "${POOL_URL:?}"
 : "${GPU_COUNT:?}"
-WILDRIG_BIN="$ROOT_DIR/.local/bin/wildrig"
+WILDRIG_BIN="$(<"$ROOT_DIR/.local/bin/.wildrig-path")"
 LOG_FILE="$ROOT_DIR/logs/wildrig-probe.log"
 TRIAL_SECONDS="${WILDRIG_TRIAL_SECONDS:-120}"
 [[ "$TRIAL_SECONDS" =~ ^[0-9]+$ ]] && (( TRIAL_SECONDS >= 30 && TRIAL_SECONDS <= 300 )) || {
