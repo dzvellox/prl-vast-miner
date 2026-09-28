@@ -110,7 +110,7 @@ else
     if bash "$ROOT_DIR/scripts/install_wildrig.sh" &&
        bash "$ROOT_DIR/scripts/probe_wildrig.sh"; then
       MINER_KIND=wildrig
-      MINER_BIN="$ROOT_DIR/.local/bin/wildrig"
+      MINER_BIN="$(<"$ROOT_DIR/.local/bin/.wildrig-path")"
     else
       echo "[Mineur] Essai WildRig non validé : utilisation de BzMiner."
     fi
