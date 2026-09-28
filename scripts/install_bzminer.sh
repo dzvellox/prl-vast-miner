@@ -11,7 +11,9 @@ ARCHIVE_PATH="$CACHE_DIR/$BZMINER_ARCHIVE"
 
 mkdir -p "$CACHE_DIR" "$INSTALL_DIR" "$BIN_DIR"
 
-if [[ -x "$BIN_DIR/bzminer" ]]; then
+VERSION_MARKER="$BIN_DIR/.bzminer-version"
+if [[ -x "$BIN_DIR/bzminer" && -f "$VERSION_MARKER" && "$(<"$VERSION_MARKER")" == "$BZMINER_VERSION" ]]; then
+  echo "BzMiner $BZMINER_VERSION déjà installé."
   exit 0
 fi
 
@@ -45,6 +47,8 @@ tar -xzf "$ARCHIVE_PATH" -C "$INSTALL_DIR"
 found="$(find "$INSTALL_DIR" -type f -name bzminer -print -quit)"
 [[ -n "$found" ]] || { echo "Erreur : binaire bzminer introuvable après extraction." >&2; exit 12; }
 
-cp "$found" "$BIN_DIR/bzminer"
-chmod 0755 "$BIN_DIR/bzminer"
-echo "BzMiner installé : $BIN_DIR/bzminer"
+cp "$found" "$BIN_DIR/bzminer.new"
+chmod 0755 "$BIN_DIR/bzminer.new"
+mv -f "$BIN_DIR/bzminer.new" "$BIN_DIR/bzminer"
+printf '%s\n' "$BZMINER_VERSION" > "$VERSION_MARKER"
+echo "BzMiner $BZMINER_VERSION installé : $BIN_DIR/bzminer"
