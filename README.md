@@ -1,6 +1,6 @@
 # PRL Vast.ai Miner — Kryptex → BNB — RTX 5090 OC
 
-Projet Linux/Vast.ai prêt à lancer pour miner **Pearl (PRL)** avec **BzMiner** ou **WildRig Multi**, envoyer les shares vers **Kryptex Pool**, créditer les gains sur ton **compte Kryptex**, puis retirer le solde en **BNB sur BNB Smart Chain (BEP20)**.
+Projet Linux/Vast.ai prêt à lancer pour miner **Pearl (PRL)** avec **BzMiner** ou **SRBMiner-MULTI**, envoyer les shares vers **Kryptex Pool**, créditer les gains sur ton **compte Kryptex**, puis retirer le solde en **BNB sur BNB Smart Chain (BEP20)**.
 
 > Important : pour recevoir en BNB via Kryptex, **ne mets pas une adresse PRL ni une adresse BNB dans BzMiner**. Le mineur doit utiliser ton **Mining Username Kryptex** (`krx...`). Le retrait BNB se fait ensuite depuis ton compte Kryptex.
 
@@ -28,7 +28,7 @@ Remplace seulement `VOTRE_USER` par ton nom d'utilisateur GitHub.
 Ensuite le script :
 
 1. détecte tous les GPU NVIDIA visibles ;
-2. teste WildRig Multi v0.51.3 si le profil RTX 5090 est éligible ; sinon installe BzMiner v100.40 ;
+2. teste SRBMiner-MULTI v3.7.0 si le profil RTX 5090 est éligible ; sinon installe BzMiner v100.40 ;
 3. vérifie le SHA-256 de l'archive officielle du mineur choisi ;
 4. configure Pearl ;
 5. se connecte au pool PRL Kryptex ;
@@ -62,7 +62,7 @@ Le chemin est :
 ```text
 GPU Vast.ai
    ↓
-BzMiner / Pearl
+SRBMiner ou BzMiner / Pearl
    ↓
 Kryptex PRL Pool
    ↓
@@ -154,26 +154,26 @@ Kryptex propose aussi SSL sur le port `8048`.
 
 # Sélection automatique du mineur
 
-Avec le profil RTX 5090 activé et un processus root, `./run.sh` télécharge WildRig Multi **0.51.3** depuis sa release officielle et vérifie son SHA-256. Il lance un essai de **120 secondes au maximum** sur le pool Kryptex avec :
+Avec le profil RTX 5090 demandé et un processus root, `./run.sh` télécharge **SRBMiner-MULTI 3.7.0** depuis sa release officielle et vérifie le SHA-256 de l'archive Linux. Il lance un essai de **120 secondes au maximum** sur Kryptex avec :
 
 ```text
---gpu-core-offset 200 --gpu-core-clock 2490 --gpu-memory-clock 7001 --gpu-powerlimit 575
+--gpu-coffset0 200 --gpu-cclock0 2490 --gpu-mclock0 7001 --gpu-plimit0 575
 ```
 
-WildRig est retenu seulement si `nvidia-smi` montre la puissance et les fréquences attendues sur **tous** les GPU visibles **et** si le journal contient une share acceptée par Kryptex. Sinon, l'essai est arrêté et le projet démarre BzMiner. Le décalage du cœur (+200 MHz) ne peut pas être confirmé indépendamment par la télémétrie ; l'essai vérifie la fréquence effective, la mémoire et la limite de puissance. Un essai peut également échouer faute de share acceptée dans ce délai, même si l'OC fonctionne.
+SRBMiner est retenu si `nvidia-smi` montre la limite de puissance et les fréquences attendues sur **tous** les GPU visibles **et** si le journal indique une share acceptée. Son identifiant de minage est envoyé sous la forme `identifiant.worker`, comme dans la commande Kryptex. Si l'essai échoue ou qu'aucune share n'arrive à temps, le projet démarre BzMiner. Le décalage du cœur (+200 MHz) ne peut pas être confirmé indépendamment par cette télémétrie.
 
-Kryptex recommande BzMiner ou SRBMiner pour Pearl et ne garantit pas WildRig sur son pool. Cette vérification évite de laisser tourner WildRig sans preuve de share acceptée. Le résultat et les erreurs sont dans `logs/wildrig-probe.log`. Le mineur actif apparaît au lancement, et `logs/miner.log` contient son activité.
+Kryptex prend officiellement en charge **SRBMiner** et **BzMiner** pour Pearl. Les détails de l'essai sont dans `logs/srbminer-probe.log`, puis l'activité du mineur sélectionné dans `logs/miner.log`.
 
-Forcer BzMiner sans essai WildRig :
+Forcer BzMiner sans essai SRBMiner :
 
 ```bash
-WILDRIG_AUTO=0 ./run.sh
+SRBMINER_AUTO=0 ./run.sh
 ```
 
 Changer la durée de l'essai (30 à 300 secondes) :
 
 ```bash
-WILDRIG_TRIAL_SECONDS=180 ./run.sh
+SRBMINER_TRIAL_SECONDS=180 ./run.sh
 ```
 
 # 🔥 Profil RTX 5090 intégré
