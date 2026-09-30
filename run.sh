@@ -6,19 +6,27 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # ============================================================
 # COMPTE KRYPTEX (AUTO-EXCHANGE -> RETRAIT BNB)
 # ============================================================
-# Mets ici ton "Mining Username" Kryptex, visible dans ton profil.
-# Exemple : krxABC123
-#
-# IMPORTANT : ne mets PAS ton adresse BNB ici.
-# Le minage est crédité sur ton compte Kryptex ; le retrait BNB
-# (BNB Smart Chain / BEP20) se fait ensuite depuis Kryptex.
-KRYPTEX_MINING_USERNAME="krxYD3M464"
+KRYPTEX_MINING_USERNAME="${KRYPTEX_MINING_USERNAME:-krxYD3M464}"
 
-# Pool PRL Kryptex officiel GLOBAL (TCP).
-# On garde volontairement Global par défaut car la région de la machine Vast.ai peut varier.
-# Aucune région de secours n'est choisie automatiquement.
-# Surcharge manuelle possible : POOL_URL=... ./run.sh
+# ============================================================
+# POOLS PRL KRYPTEX + ROUTES DE SECOURS
+# ============================================================
+# Route principale : Global en TCP.
 POOL_URL="${POOL_URL:-stratum+tcp://prl.kryptex.network:7048}"
+
+# BzMiner sait gérer les pools de secours nativement. Si la route principale
+# ne répond plus, il passe à la suivante puis revient automatiquement au
+# primaire lorsqu'il redevient valide.
+#
+# Ordre par défaut :
+#   1) Global SSL   -> secours immédiat si TCP/7048 est filtré
+#   2) Europe SSL  -> autre endpoint + autre port/protocole
+#   3) Europe TCP
+#   4) US SSL
+#   5) US TCP
+#
+# Format : URLs séparées par des virgules. Pour désactiver : POOL_FALLBACKS=""
+POOL_FALLBACKS="${POOL_FALLBACKS-stratum+ssl://prl.kryptex.network:8048,stratum+ssl://prl-eu.kryptex.network:8048,stratum+tcp://prl-eu.kryptex.network:7048,stratum+ssl://prl-us.kryptex.network:8048,stratum+tcp://prl-us.kryptex.network:7048}"
 
 # ============================================================
 # PROFIL OVERCLOCK RTX 5090
@@ -34,11 +42,9 @@ mkdir -p "$ROOT_DIR/logs" "$ROOT_DIR/.cache" "$ROOT_DIR/.local/bin"
 
 if [[ -z "$KRYPTEX_MINING_USERNAME" || "$KRYPTEX_MINING_USERNAME" == "REMPLACE_ICI_PAR_TON_MINING_USERNAME_KRYPTEX" ]]; then
   echo "Erreur : configure ton Mining Username Kryptex dans run.sh (KRYPTEX_MINING_USERNAME=...)." >&2
-  echo "Tu le trouves dans ton profil Kryptex. Exemple de format : krxXXXXXX" >&2
   exit 2
 fi
 
-# Le format habituel est krx..., mais on ne bloque pas si Kryptex change son format.
 if [[ "$KRYPTEX_MINING_USERNAME" != krx* ]]; then
   echo "AVERTISSEMENT : le Mining Username Kryptex ne commence pas par 'krx'. Vérifie la valeur dans ton profil Kryptex." >&2
 fi
@@ -71,7 +77,6 @@ fi
 WORKER_NAME="$(printf '%s' "$RAW_WORKER" | tr -cd 'A-Za-z0-9' | cut -c1-32)"
 WORKER_NAME="${WORKER_NAME:-VastRig}"
 
-# Décide si le profil OC peut être utilisé sans risquer de l'appliquer à un autre modèle.
 OC_APPLY=0
 if [[ "$OC_ENABLE" == "1" ]]; then
   all_target=1
@@ -94,37 +99,33 @@ else
   echo "[OC] Désactivé (OC_ENABLE=$OC_ENABLE)."
 fi
 
-export KRYPTEX_MINING_USERNAME POOL_URL WORKER_NAME
+export KRYPTEX_MINING_USERNAME POOL_URL POOL_FALLBACKS WORKER_NAME
 export RESTART_DELAY="${RESTART_DELAY:-5}"
 export MAX_RESTARTS="${MAX_RESTARTS:-0}"
 export EXTRA_ARGS="${EXTRA_ARGS:-}"
 export OC_APPLY OC_CORE_OFFSET OC_LOCK_CORE OC_LOCK_MEMORY OC_POWER_LIMIT
 
-MINER_KIND=bzminer
 if [[ -n "${MINER_BIN:-}" ]]; then
-  echo "[Mineur] Binaire personnalisé : $MINER_BIN"
+  echo "[Mineur] Binaire BzMiner personnalisé : $MINER_BIN"
 else
   MINER_BIN="$ROOT_DIR/.local/bin/bzminer"
-  if [[ "$OC_APPLY" == "1" && "${SRBMINER_AUTO:-1}" == "1" ]]; then
-    export GPU_COUNT
-    if bash "$ROOT_DIR/scripts/install_srbminer.sh" &&
-       bash "$ROOT_DIR/scripts/probe_srbminer.sh"; then
-      MINER_KIND=srbminer
-      MINER_BIN="$(<"$ROOT_DIR/.local/bin/.srbminer-path")"
-    else
-      echo "[Mineur] Essai SRBMiner non validé : utilisation de BzMiner."
-    fi
-  fi
-  if [[ "$MINER_KIND" == "bzminer" ]]; then
-    bash "$ROOT_DIR/scripts/install_bzminer.sh"
-  fi
+  bash "$ROOT_DIR/scripts/install_bzminer.sh"
 fi
-export MINER_BIN MINER_KIND
+export MINER_BIN
 
 echo
 echo "=== Lancement PRL -> Kryptex ==="
-echo "Mineur         : $MINER_KIND"
-echo "Pool           : $POOL_URL"
+echo "Mineur         : BzMiner"
+echo "Pool principal : $POOL_URL"
+if [[ -n "$POOL_FALLBACKS" ]]; then
+  IFS=',' read -r -a _fallback_display <<< "$POOL_FALLBACKS"
+  echo "Pools secours  : ${#_fallback_display[@]} route(s)"
+  for _p in "${_fallback_display[@]}"; do
+    [[ -n "$_p" ]] && echo "  -> $_p"
+  done
+else
+  echo "Pools secours  : désactivés"
+fi
 echo "Compte Kryptex : ${KRYPTEX_MINING_USERNAME:0:4}***"
 echo "Worker         : $WORKER_NAME"
 echo "Paiement visé  : BNB Smart Chain depuis le compte Kryptex"

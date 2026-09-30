@@ -21,37 +21,51 @@ else
 fi
 
 if [[ "$(id -u)" -eq 0 ]]; then
-  say_ok "exécution root : les réglages OC SRBMiner/BzMiner peuvent être tentés"
+  say_ok "exécution root : les réglages OC BzMiner peuvent être tentés"
 else
   say_warn "pas root : le profil OC sera automatiquement ignoré sous Linux"
 fi
 
-pool="${POOL_URL:-stratum+tcp://prl.kryptex.network:7048}"
-hostport="${pool#*://}"
-host="${hostport%%:*}"
-port="${hostport##*:}"
-if command -v getent >/dev/null 2>&1 && getent hosts "$host" >/dev/null 2>&1; then
-  say_ok "DNS du pool Kryptex résolu : $host"
-else
-  say_warn "impossible de confirmer la résolution DNS du pool : $host"
+PRIMARY_POOL="${POOL_URL:-stratum+tcp://prl.kryptex.network:7048}"
+FALLBACK_POOLS="${POOL_FALLBACKS-stratum+ssl://prl.kryptex.network:8048,stratum+ssl://prl-eu.kryptex.network:8048,stratum+tcp://prl-eu.kryptex.network:7048,stratum+ssl://prl-us.kryptex.network:8048,stratum+tcp://prl-us.kryptex.network:7048}"
+POOLS=("$PRIMARY_POOL")
+if [[ -n "$FALLBACK_POOLS" ]]; then
+  IFS=',' read -r -a _fb <<< "$FALLBACK_POOLS"
+  POOLS+=("${_fb[@]}")
 fi
 
-if command -v timeout >/dev/null 2>&1 && timeout 3 bash -c "</dev/tcp/$host/$port" >/dev/null 2>&1; then
-  say_ok "port du pool accessible : $host:$port"
+reachable=0
+for pool in "${POOLS[@]}"; do
+  [[ -n "$pool" ]] || continue
+  hostport="${pool#*://}"
+  host="${hostport%%:*}"
+  port="${hostport##*:}"
+  scheme="${pool%%://*}"
+
+  if command -v getent >/dev/null 2>&1 && getent hosts "$host" >/dev/null 2>&1; then
+    dns_status="DNS OK"
+  else
+    dns_status="DNS ?"
+  fi
+
+  if command -v timeout >/dev/null 2>&1 && timeout 3 bash -c "</dev/tcp/$host/$port" >/dev/null 2>&1; then
+    say_ok "route pool accessible ($scheme) : $host:$port [$dns_status]"
+    reachable=$((reachable + 1))
+  else
+    say_warn "route pool non confirmée ($scheme) : $host:$port [$dns_status]"
+  fi
+done
+
+if (( reachable == 0 )); then
+  say_warn "aucune route Kryptex n'a été confirmée par le test TCP; BzMiner essaiera quand même toutes les routes configurées"
 else
-  say_warn "impossible de confirmer l'accès TCP à $host:$port (cela peut dépendre du conteneur/réseau)"
+  say_ok "$reachable route(s) Kryptex accessible(s) sur ${#POOLS[@]} testée(s)"
 fi
 
 if [[ -x "$ROOT_DIR/.local/bin/bzminer" ]]; then
   say_ok "BzMiner installé localement"
 else
-  say_warn "BzMiner pas encore installé (run.sh l'installera en cas de repli)"
-fi
-
-if [[ -f "$ROOT_DIR/.local/bin/.srbminer-path" ]] && [[ -x "$(<"$ROOT_DIR/.local/bin/.srbminer-path")" ]]; then
-  say_ok "SRBMiner installé localement"
-else
-  say_warn "SRBMiner pas encore installé (run.sh le testera si le profil OC est éligible)"
+  say_warn "BzMiner pas encore installé (run.sh l'installera automatiquement)"
 fi
 
 exit $(( ok ? 0 : 1 ))
